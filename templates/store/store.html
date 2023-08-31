@@ -4,10 +4,13 @@
 <!-- ========================= SECTION PAGETOP ========================= -->
 <section class="section-pagetop bg">
     <div class="container ">
+        {% if 'search' in request.path %}
+        <h2 class="title-page">Search resualt:  <span class="text-success">Found  {{product_count}}  Items.</span></h2>
+        {% else %}
         <h2 class="title-page">Our Store</h2>
-        
+        {% endif %}
     </div> <!-- container //  -->
-    </section>
+    </section> 
     <!-- ========================= SECTION INTRO END// ========================= -->
     
     <!-- ========================= SECTION CONTENT ========================= -->
@@ -119,13 +122,18 @@
     
     <header class="border-bottom mb-4 pb-3">
             <div class="form-inline">
-                <span class="mr-md-auto">{{products|length}} Items found </span>
+                <span class="mr-md-auto badge bg-warning text-light">{{paginator.object_list|length}} Of {{product_count}} Items. </span>
                 
             </div>
     </header><!-- sect-heading -->
     
     <div class="row">
-       {% for product in products %}
+    {% if not product_count %}
+        <h2>There is no product to show.</h2>
+        <br>
+        <h2>Please try again.</h2>
+    {% else %}
+       {% for product in paginator.object_list %}
         <div class="col-md-4">
             <figure class="card card-product-grid">
                 <div class="img-wrap"> 
@@ -142,7 +150,7 @@
                         </div> <!-- price-wrap.// -->
                     </div>
                     {% if product.stock > 0 %}
-                    <a href="#" class="btn btn-block btn-success">Added to cart </a>
+                    <a href="{{product.get_url}}" class="btn btn-block btn-success">Added to cart </a>
                     {% else %}
                     <button class="btn btn-block btn-danger">Out Of Stock</button>
                     {% endif %}
@@ -152,17 +160,35 @@
     {% endfor %}
         
     </div> <!-- row end.// -->
+    {% endif %}
     
-    
+    {% if paginator.has_other_pages %}
     <nav class="mt-4" aria-label="Page navigation sample">
       <ul class="pagination">
-        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">2</a></li>
-        <li class="page-item"><a class="page-link" href="#">3</a></li>
-        <li class="page-item"><a class="page-link" href="#">Next</a></li>
-      </ul>
-    </nav>
+        {% if paginator.has_previous %}
+        <li class="page-item "><a class="page-link"  href="?{%if keyword %}keyword={{keyword}}&{%endif%}page={{paginator.previous_page_number}}" >Previous</a></li>
+        {% else %}
+        <li class="page-item  disabled "><a class="page-link"  href="#" >Previous</a></li>
+        {% endif %}
+        {% for page in paginator.elided  %} 
+            {% if paginator.number == page %}
+                <li class="page-item active"><a class="page-link" href="?{%if keyword %}keyword={{keyword}}&{%endif%}page={{page}}">{{page}}</a></li>
+            {% else %}
+                {% if page == paginator.ELLIPSIS %}
+                    <li class="page-item"><span class="page-link">{{paginator.ELLIPSIS}}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?{%if keyword %}keyword={{keyword}}&{%endif%}page={{ page }}">{{ page }}</a> </li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if paginator.has_next %}
+        <li class="page-item  "><a class="page-link"  href="?{%if keyword %}keyword={{keyword}}&{%endif%}page={{paginator.next_page_number}}">Next</a></li>
+        {% else %}
+        <li class="page-item  disabled"><a class="page-link" href="#">Next</a></li>
+         {% endif %}
+    </ul>
+</nav>
+{% endif %} 
     
         </main> <!-- col.// -->
     

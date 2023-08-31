@@ -37,9 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mathfilters',
     'accounts',
     'category',
     'store',
+    'carts',
+    
 ]
 
 MIDDLEWARE = [
@@ -65,7 +68,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'category.context_processors.menu_links'
+                'category.context_processors.menu_links',
+                'carts.context_processors.cartLength',
             ],
         },
     },
@@ -122,7 +126,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT=BASE_DIR /'static'
 STATICFILES_DIRS = [
-  '/static',  
+     'greatkart/static/',
 ]
 
 # media files configuration
