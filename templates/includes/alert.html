@@ -1,0 +1,13 @@
+{% if messages %}
+    {% for message in messages %}
+        <div class="container p-0 mt-1">
+            <div class="alert {{message.tags}} alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="True">&times;</span>
+                </button>
+                {% if message.level == DEFAULT_MESSAGE_LEVELS_ERROR %}IMPORTANT: {% endif %}
+                {{message }}
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}

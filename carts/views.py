@@ -1,9 +1,10 @@
 from django.shortcuts import render,get_object_or_404,redirect,HttpResponse
 from store.models import Product,Variation
 from carts.models import Cart,CartItem
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
-
+@login_required(login_url='login')
 def add_cart(request,product_id):
     product=Product.objects.get(id=product_id)
     product_variation=[]

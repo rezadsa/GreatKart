@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-conten padding-y" style="min-height:84vh">
+  {% if request.GET.command == 'verification' %}
+  <div class=" container alert alert-info mx-auto" role="alert" style="max-width: 800px; margin-top:100px;">
+    Thank you for registring with us. We have sent you a verification email to your email address [{{request.GET.email}}].
+    <br><br>
+    Already verified. <a href="{% url 'login'%}">Login</a>
+  </div>
+  {% elif request.GET.command == 'resetpassword' %}
+ 
+  <div class=" container alert alert-info mx-auto" role="alert" style="max-width: 800px; margin-top:100px;">
+    We have sent you a verification email for reset your password to your email address [{{request.GET.email}}].
+    <br><br>
+    Already verified. <a href="{% url 'login'%}">Login</a>
+  </div>
+<!-- ============================ COMPONENT LOGIN  END.// ================================= -->
+
+{% endif %}
+<!-- ========================= SECTION CONTENT END// ========================= -->
+</section>
+    <!-- ============================ COMPONENT LOGIN   ================================= -->
+        
+          
+{% endblock %}
