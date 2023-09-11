@@ -5,7 +5,11 @@ from random import randint
 from django.contrib import messages,auth
 from django.contrib.auth.decorators import login_required
 
+from carts.models import Cart,CartItem
+from carts.views import _cart_id
+
 import re
+import requests
 
 # verification email
 from django.contrib.sites.shortcuts import get_current_site
@@ -189,11 +193,63 @@ def login(request):
             password=request.POST.get('password')
 
             user=auth.authenticate(email=email, password=password)
+          
            
             if user :
-                    auth.login(request, user)
-                    messages.success(request,f'{user.username}, Welcome. ')
+               try:
+                    cart=Cart.objects.get(cart_id=_cart_id(request))
+                    if cart:
+                         cartItem=CartItem.objects.filter(cart=cart)
+
+                         product_variation=[]
+                         pro_id=[]
+                         for item in cartItem:
+                              product_variation.append(list(item.variation.all()))
+                              pro_id.append(item.id)
+
+                         
+                         ex_variation=[]
+                         ex_id=[]
+                         cartItem=CartItem.objects.filter(user=user)
+                         for item in cartItem:
+                              ex_variation.append(list(item.variation.all()))
+                              ex_id.append(item.id)
+                                                  
+                         
+
+                    for pr in product_variation:
+                         if pr in ex_variation:
+                              index=ex_variation.index(pr)
+                              item_id=ex_id[index]
+                              item=CartItem.objects.get(id=item_id)
+                              item.quantity+=CartItem.objects.get(id=pro_id[product_variation.index(pr)]).quantity
+                              
+                              item.save()
+                         else:
+                              cartItem=CartItem.objects.filter(cart=cart)
+                              for item in cartItem:
+                                   item.user=user
+                                   item.save()
+
+               except:
+                    pass
+
+               auth.login(request, user)
+               messages.success(request,f'{user.username}, Welcome. ')
+
+               url=request.META.get('HTTP_REFERER')
+              
+               try:
+                    query=requests.utils.urlparse(url).query
+                    params=dict(x.split('=') for x in query.split('&'))
+                    if 'next' in params:
+                         nextPage=params['next']
+                         return redirect(nextPage)
+                    
+               except:
                     return redirect('dashboard')
+                                     
+
             else:
                 messages.error(request,'Username or Password is wrong!')
                 return redirect('login')
