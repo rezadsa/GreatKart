@@ -3,6 +3,11 @@ from store.models import Product,Variation
 from carts.models import Cart,CartItem
 from django.contrib.auth.decorators import login_required
 
+from orders.models import Order
+
+from greatkart.settings import TAX_RATE
+from orders.forms import OrderForm
+
 
 # Create your views here.
 
@@ -122,7 +127,7 @@ def remove_cartItem(request,cartItem_id):
      return redirect('cart')
 
 def cart(request):
-    TAX_RATE= 0.1
+    
     total_amount=0
     tax=0
     total_payment=0
@@ -151,26 +156,42 @@ def cart(request):
 @login_required(login_url='login')
 def checkout(request):
 
-    TAX_RATE= 0.1
+    current_user=request.user
+
+    order_already_exists=Order.objects.filter(user=current_user,status='New',is_ordered=False).exists()
+    if order_already_exists:
+             return redirect('payment')
+    
     total_amount=0
     tax=0
     total_payment=0
     try:
-         cartItems=CartItem.objects.filter(user=request.user).all()
-         for item in cartItems:
-              total_amount+=item.quantity*item.product.price
-         tax=float(total_amount)* TAX_RATE
-         total_payment=float(total_amount)+tax
-         
+         cartItems=CartItem.objects.filter(user=current_user).all()
     except CartItem.DoesNotExist:
          cartItems=None
-    
-    context={
-         'cartItems': cartItems,
-         'total_amount': total_amount,
-         'total_payment':total_payment,
-         'tax': tax,
-    }
+     
+    if cartItems :
+          for item in cartItems:
+              total_amount+=item.quantity*item.product.price
+              
+          tax=float(total_amount)* TAX_RATE
+          total_payment=float(total_amount)+tax
+         
+          form=OrderForm(initial={
+               'first_name':current_user.first_name,
+               'last_name':current_user.last_name,
+               'email':current_user.email,
+               'phone':current_user.phone,
+          })      
+          
+          context={
+               'cartItems': cartItems,
+               'total_amount': total_amount,
+               'total_payment':total_payment,
+               'tax': tax,
+               'form':form
+          }
 
-
-    return render(request,'carts/checkout.html',context)
+          return render(request,'carts/checkout.html',context)
+    else:
+         return redirect('store')
